@@ -1,17 +1,20 @@
-
 #include "GPIOClass.h"
+#include <iostream>
+#include <sstream>
+#include <unistd.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-using namespace std;
-
-GPIOClass::GPIOClass():valuefd(-1),directionfd(-1),exportfd(-1),unexportfd(-1),gpionum("4")
+GPIOClass::GPIOClass(int const pin):valuefd(-1),
+				    directionfd(-1),
+				    exportfd(-1),
+				    unexportfd(-1),
+				    _pin(pin)
 {
-        //GPIO4 is default
-	this->export_gpio();
-}
-
-GPIOClass::GPIOClass(string gnum):valuefd(-1),directionfd(-1),exportfd(-1),unexportfd(-1),gpionum(gnum)
-{
-	//Instatiate GPIOClass object for GPIO pin number "gnum"
 	this->export_gpio();
 }
 
@@ -20,30 +23,27 @@ GPIOClass::~GPIOClass()
 	this->unexport_gpio();
 }
 
-
 int GPIOClass::export_gpio()
 {
 	int statusVal = -1;
 	string exportStr = "/sys/class/gpio/export";
 	this->exportfd = statusVal = open(exportStr.c_str(),  O_WRONLY|O_SYNC);
 	if (statusVal < 0){
-		perror("could not open SYSFS GPIO export device");
-        exit(1);
+	  perror("could not open SYSFS GPIO export device");
+	  exit(1);
 	}
 	
-	stringstream ss;
-	ss << this->gpionum;
-	string numStr = ss.str();
+	auto const numStr = std::to_string(this->_pin);
 	statusVal = write(this->exportfd, numStr.c_str(), numStr.length());
 	if (statusVal < 0){
 		perror("could not write to SYSFS GPIO export device");
-        exit(1);
+		exit(1);
 	}
 	
 	statusVal = close(this->exportfd);
 	if (statusVal < 0){
 		perror("could not close SYSFS GPIO export device");
-        exit(1);
+		exit(1);
 	}
 
     return statusVal;
@@ -59,9 +59,7 @@ int GPIOClass::unexport_gpio()
         exit(1);
 	}
 
-	stringstream ss;
-	ss << this->gpionum;
-	string numStr = ss.str();
+	auto const numStr = std::to_string(this->_pin);
 	statusVal = write(this->unexportfd, numStr.c_str(), numStr.length());
 	if (statusVal < 0){
 		perror("could not write to SYSFS GPIO unexport device");
