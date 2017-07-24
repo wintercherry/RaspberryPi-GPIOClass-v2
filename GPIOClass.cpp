@@ -75,16 +75,15 @@ int GPIOClass::unexport_gpio()
 	return statusVal;
 }
 
-int GPIOClass::setdir_gpio(string dir)
+auto GPIOClass::setdir_gpio(Direction const direction dir) -> int
 {
 	int statusVal = -1;
-	string setdirStr ="/sys/class/gpio/gpio" + this->gpionum + "/direction";
-	
+	string setdirStr ="/sys/class/gpio/gpio" + std::to_string(this->_pin) + "/direction";	
 	
 	this->directionfd = statusVal = open(setdirStr.c_str(), O_WRONLY|O_SYNC); // open direction file for gpio
 		if (statusVal < 0){
 			perror("could not open SYSFS GPIO direction device");
-        exit(1);
+			exit(1);
 		}
 		
 	if (dir.compare("in") != 0 && dir.compare("out") != 0 ) {
@@ -108,77 +107,72 @@ int GPIOClass::setdir_gpio(string dir)
 }
 
 
-int GPIOClass::setval_gpio(string val)
+auto GPIOClass::setValue(bool const bval) -> int
 {
 
     int statusVal = -1;
-	string setValStr = "/sys/class/gpio/gpio" + this->gpionum + "/value";
+    string setValStr = "/sys/class/gpio/gpio" + std::to_string(this->_pin) + "/value";
 	
-	this->valuefd = statusVal = open(setValStr.c_str(), O_WRONLY|O_SYNC);
-	if (statusVal < 0){
-			perror("could not open SYSFS GPIO value device");
-        exit(1);
-	}
+    this->valuefd = statusVal = open(setValStr.c_str(), O_WRONLY|O_SYNC);
+    if (statusVal < 0){
+      perror("could not open SYSFS GPIO value device");
+      exit(1);
+    }
+    auto const val = std::to_string(bval);
+    if (val.compare("1") != 0 && val.compare("0") != 0 ) {
+      fprintf(stderr, "Invalid  value. Should be \"1\" or \"0\". \n");
+      exit(1);
+    }
 		
-	if (val.compare("1") != 0 && val.compare("0") != 0 ) {
-		fprintf(stderr, "Invalid  value. Should be \"1\" or \"0\". \n");
-		exit(1);
-	}
-		
-	statusVal = write(this->valuefd, val.c_str(), val.length());
-	if (statusVal < 0){
-		perror("could not write to SYSFS GPIO value device");
-        exit(1);
-	}
+    statusVal = write(this->valuefd, val.c_str(), val.length());
+    if (statusVal < 0){
+      perror("could not write to SYSFS GPIO value device");
+      exit(1);
+    }
 	
-	statusVal = close(this->valuefd);
-	if (statusVal < 0){
-		perror("could not close SYSFS GPIO value device");
-        exit(1);
-	}
+    statusVal = close(this->valuefd);
+    if (statusVal < 0){
+      perror("could not close SYSFS GPIO value device");
+      exit(1);
+    }
 
-	    return statusVal;
+    return statusVal;
 }
 
+auto GPIOClass::getValue() const -> bool {
+  string getValStr = "/sys/class/gpio/gpio" + std::to_string(this->_pin) + "/value";
+  char buff[10];
+  auto statusVal = false;
+  this->valuefd = statusVal = open(getValStr.c_str(), O_RDONLY|O_SYNC);
+  if (statusVal < 0){
+    perror("could not open SYSFS GPIO value device");
+    exit(1);
+  }
 
-int GPIOClass::getval_gpio(string& val){
+  statusVal = read(this->valuefd, &buff, 1);
+  if (statusVal < 0){
+    perror("could not read SYSFS GPIO value device");
+    exit(1);
+  }
+	
+  buff[1]='\0';
+	
+  val = string(buff);
+	
+  if (val.compare("1") != 0 && val.compare("0") != 0 ) {
+    fprintf(stderr, "Invalid  value read. Should be \"1\" or \"0\". \n");
+    exit(1);
+  }
+	
+  statusVal = close(this->valuefd);
+  if (statusVal < 0){
+    perror("could not close SYSFS GPIO value device");
+    exit(1);
+  }
 
-	string getValStr = "/sys/class/gpio/gpio" + this->gpionum + "/value";
-	char buff[10];
-	int statusVal = -1;
-	this->valuefd = statusVal = open(getValStr.c_str(), O_RDONLY|O_SYNC);
-	if (statusVal < 0){
-			perror("could not open SYSFS GPIO value device");
-        exit(1);
-	}
-
-	statusVal = read(this->valuefd, &buff, 1);
-	if (statusVal < 0){
-		perror("could not read SYSFS GPIO value device");
-        exit(1);
-	}
-	
-	buff[1]='\0';
-	
-	val = string(buff);
-	
-	if (val.compare("1") != 0 && val.compare("0") != 0 ) {
-		fprintf(stderr, "Invalid  value read. Should be \"1\" or \"0\". \n");
-		exit(1);
-	}
-	
-	statusVal = close(this->valuefd);
-	if (statusVal < 0){
-		perror("could not close SYSFS GPIO value device");
-        exit(1);
-	}
-
-	return statusVal;
+  return statusVal;
 }
 
-
-string GPIOClass::get_gpionum(){
-
-return this->gpionum;
-
+auto GPIOClass::getPin() -> int{
+  return this->_pin;
 }
