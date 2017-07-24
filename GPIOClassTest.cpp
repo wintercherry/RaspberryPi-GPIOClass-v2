@@ -1,4 +1,4 @@
-#include "GPIOClass.h"
+#include "GPIO.h"
  
 using namespace std;
  

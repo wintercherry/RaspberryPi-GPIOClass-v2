@@ -9,11 +9,11 @@
 enum class Direction { In, Out };
 enum class PinValue { High, Low };
 
-final class GPIO
+class GPIO final
 {
 public:
-  GPIOClass(int pin);
-  ~GPIOClass();
+  GPIO(int pin);
+  ~GPIO();
   auto setDirection(Direction) -> int;
   auto getDirection() const -> Direction;
   auto setValue(PinValue) -> int;
