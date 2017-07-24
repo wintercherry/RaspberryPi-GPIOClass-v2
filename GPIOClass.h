@@ -22,11 +22,6 @@ public:
 private:
   int export_gpio();
   int unexport_gpio();
-	
-  int valuefd;
-  int directionfd;
-  int exportfd;
-  int unexportfd;
   int const _pin;	
 };
 
