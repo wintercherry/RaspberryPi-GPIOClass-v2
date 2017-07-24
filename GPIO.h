@@ -6,6 +6,11 @@
  * The GPIO pin number must be passed to the overloaded class constructor
  */
 
+
+// todo: would be nice if there were a way to save the state of all pins
+// and then push that state back on exit. i believe the python gpio interface
+// has a cleanup method that does this but i could be mistaken
+
 enum class Direction { In, Out };
 enum class PinValue { High, Low };
 
