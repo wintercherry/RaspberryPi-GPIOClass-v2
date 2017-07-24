@@ -24,11 +24,19 @@ std::ostream& operator<<(std::ostream& os, PinValue const p) {
   return os;
 }
 
-GPIO::GPIO(int const pin) : _pin(pin) {
+GPIO::GPIO(int const pin, Direction const dir, PinValue const val) : _pin(pin) {
   this->export_gpio();
+  
+  _initialValue = this->getValue();
+  _initialDirection = this->getDirection();
+
+  setValue(val);
+  setDirection(dir);
 }
 
 GPIO::~GPIO() {
+  this->setValue(_initialValue);
+  this->setDirection(_initialDirection);
   this->unexport_gpio();
 }
 
@@ -116,6 +124,36 @@ auto GPIO::setDirection(Direction const direction) -> int {
   }
 
   return statusVal;
+}
+
+auto GPIO::getDirection() const -> Direction {
+  int statusVal = -1;
+  std::string setdirStr ="/sys/class/gpio/gpio" + std::to_string(this->_pin) + "/direction";	
+  char buff[3];
+  auto const directionfd = statusVal = open(setdirStr.c_str(), O_WRONLY|O_SYNC); // open direction file for gpio
+  if (statusVal < 0){
+    perror("could not open SYSFS GPIO direction device");
+    exit(1);
+  }
+  statusVal = read(directionfd, &buff, 3);
+  if (statusVal < 0){
+    perror("could not read SYSFS GPIO direction device");
+    exit(1);
+  }
+
+  if ((statusVal == 3 && (buff[0] != 'o' || buff[1] != 'u' || buff[2] != 't'))
+      || (statusVal == 2 && (buff[0] != 'i' || buff[1] != 'n'))) {
+      perror("invalid direction stored in SYSFS GPIO direction device");
+      exit(1);
+  }
+  auto result = statusVal == 2 ? Direction::In : Direction::Out;
+  statusVal = close(directionfd);
+  if (statusVal < 0){
+    perror("could not close SYSFS GPIO direction device");
+    exit(1);
+  }
+
+  return result;
 }
 
 

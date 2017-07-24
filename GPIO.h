@@ -20,7 +20,7 @@ std::ostream& operator<<(std::ostream&, PinValue);
 class GPIO final
 {
 public:
-  GPIO(int pin);
+  GPIO(int pin, Direction dir = Direction::In, PinValue val = PinValue::Low);
   ~GPIO();
   auto setDirection(Direction) -> int;
   auto getDirection() const -> Direction;
@@ -30,6 +30,8 @@ public:
 private:
   int export_gpio();
   int unexport_gpio();
-  int const _pin;	
+  int const _pin;
+  PinValue _initialValue;
+  Direction _initialDirection;
 };
 
