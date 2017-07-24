@@ -1,5 +1,4 @@
 #include "GPIO.h"
-#include <iostream>
 #include <sstream>
 #include <unistd.h>
 #include <errno.h>
@@ -8,6 +7,22 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+std::ostream& operator<<(std::ostream&os, Direction const d) {
+  if (d == Direction::Out)
+    os << "out";
+  else
+    os << "in";
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, PinValue const p) {
+  if (p == PinValue::Low)
+    os << "low";
+  else
+    os << "high";
+  return os;
+}
 
 GPIO::GPIO(int const pin) : _pin(pin) {
   this->export_gpio();

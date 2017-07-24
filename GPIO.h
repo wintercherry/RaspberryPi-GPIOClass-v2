@@ -14,6 +14,9 @@
 enum class Direction { In, Out };
 enum class PinValue { High, Low };
 
+std::ostream& operator<<(std::ostream&, Direction);
+std::ostream& operator<<(std::ostream&, PinValue);
+
 class GPIO final
 {
 public:

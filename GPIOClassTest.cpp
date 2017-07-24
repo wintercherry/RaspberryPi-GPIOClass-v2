@@ -1,52 +1,51 @@
 #include "GPIO.h"
- 
-using namespace std;
- 
+#include <iostream>
+#include <unistd.h>
+
 int main (void)
 {
  
-    string inputstate;
-    int i = 0;
-    auto gpio4 = GPIO(4); //create new GPIO object to be attached to  GPIO4
-    auto gpio17 = GPIO(17); //create new GPIO object to be attached to  GPIO17
+	auto inputstate = PinValue::Low;
+	int i = 0;
+	auto gpio4 = GPIO{4}; //create new GPIO object to be attached to  GPIO4
+	auto gpio17 = GPIO{17}; //create new GPIO object to be attached to  GPIO17
  
-    cout << " GPIO pins exported" << endl;
+	std::cout << " GPIO pins exported" << std::endl;
  
-    gpio17.setDirection(Direction::In); //GPIO4 set to input
-    gpio4.setDirection(Direction::Out); // GPIO17 set to output
+	gpio17.setDirection(Direction::In); //GPIO4 set to input
+	gpio4.setDirection(Direction::Out); // GPIO17 set to output
  
-    cout << " Set GPIO pin directions" << endl;
+	std::cout << " Set GPIO pin directions" << std::endl;
  
-    while(i < 20)
-    {
-        usleep(500000);  // wait for 0.5 seconds
-        gpio17.getValue(inputstate); //read state of GPIO17 input pin
-        cout << "Current input pin state is " << inputstate  <<endl;
-        if(inputstate == "0") // if input pin is at state "0" i.e. button pressed
-        {
-            cout << "input pin state is \"Pressed \".n Will check input pin state again in 20ms "<<endl;
-                usleep(20000);
-                    cout << "Checking again ....." << endl;
-                    gpio17->getval_gpio(inputstate); // checking again to ensure that state "0" is due to button press and not noise
-            if(inputstate == "0")
-            {
-                cout << "input pin state is definitely \"Pressed\". Turning LED ON" <<endl;
-                gpio4->setval_gpio("1"); // turn LED ON
+	while(i < 20)
+	{
+		usleep(500000);  // wait for 0.5 seconds
+		inputstate = gpio17.getValue(); //read state of GPIO17 input pin
+		std::cout << "Current input pin state is " << inputstate  << std::endl;
+		if(inputstate == PinValue::Low) // if input pin is at state "0" i.e. button pressed
+		{
+			std::cout << "input pin state is \"Pressed \".n Will check input pin state again in 20ms "<<std::endl;
+			usleep(20000);
+			std::cout << "Checking again ....." << std::endl;
+			inputstate = gpio17.getValue(); // checking again to ensure that state "0" is due to button press and not noise
+			if(inputstate == PinValue::Low)
+			{
+				std::cout << "input pin state is definitely \"Pressed\". Turning LED ON" <<std::endl;
+				gpio4.setValue(PinValue::High); // turn LED ON 
+				std::cout << " Waiting until pin is unpressed....." << std::endl;
+				while (inputstate == PinValue::Low){ // ehhhhh i know this is a test but ehhhhh
+					inputstate = gpio17.getValue();
+				};
+				std::cout << "pin is unpressed" << std::endl;
  
-                cout << " Waiting until pin is unpressed....." << endl;
-                while (inputstate == "0"){
-                gpio17->getval_gpio(inputstate);
-                };
-                cout << "pin is unpressed" << endl;
+			}
+			else
+				std::cout << "input pin state is definitely \"UnPressed\". That was just noise." <<std::endl;
  
-            }
-            else
-                cout << "input pin state is definitely \"UnPressed\". That was just noise." <<endl;
- 
-        }
-        gpio4->setval_gpio("0");
-        i++;
-    }
+		}
+		gpio4.setValue(PinValue::Low);
+		i++;
+	}
         
-    return 0;
+	return 0;
 }
