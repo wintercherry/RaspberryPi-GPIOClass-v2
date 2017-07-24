@@ -7,20 +7,20 @@ int main (void)
  
     string inputstate;
     int i = 0;
-    GPIOClass* gpio4 = new GPIOClass("4"); //create new GPIO object to be attached to  GPIO4
-    GPIOClass* gpio17 = new GPIOClass("17"); //create new GPIO object to be attached to  GPIO17
+    auto gpio4 = GPIO(4); //create new GPIO object to be attached to  GPIO4
+    auto gpio17 = GPIO(17); //create new GPIO object to be attached to  GPIO17
  
     cout << " GPIO pins exported" << endl;
  
-    gpio17->setdir_gpio("in"); //GPIO4 set to output
-    gpio4->setdir_gpio("out"); // GPIO17 set to input
+    gpio17.setDirection(Direction::In); //GPIO4 set to input
+    gpio4.setDirection(Direction::Out); // GPIO17 set to output
  
     cout << " Set GPIO pin directions" << endl;
  
     while(i < 20)
     {
         usleep(500000);  // wait for 0.5 seconds
-        gpio17->getval_gpio(inputstate); //read state of GPIO17 input pin
+        gpio17.getValue(inputstate); //read state of GPIO17 input pin
         cout << "Current input pin state is " << inputstate  <<endl;
         if(inputstate == "0") // if input pin is at state "0" i.e. button pressed
         {
@@ -47,12 +47,6 @@ int main (void)
         gpio4->setval_gpio("0");
         i++;
     }
-    
-    cout << "Releasing heap memory and exiting....." << endl;
-    delete gpio4;
-    delete gpio17;
-    gpio4 = NULL;
-    gpio17 = NULL;
-    
+        
     return 0;
 }
