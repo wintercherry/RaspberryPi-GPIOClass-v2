@@ -9,7 +9,7 @@
 enum class Direction { In, Out };
 enum class PinValue { High, Low };
 
-final class GPIOClass
+final class GPIO
 {
 public:
   GPIOClass(int pin);

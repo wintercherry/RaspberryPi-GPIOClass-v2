@@ -1,4 +1,4 @@
-#include "GPIOClass.h"
+#include "GPIO.h"
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-GPIOClass::GPIOClass(int const pin):valuefd(-1),
+GPIO::GPIO(int const pin):valuefd(-1),
 				    directionfd(-1),
 				    exportfd(-1),
 				    unexportfd(-1),
@@ -17,11 +17,11 @@ GPIOClass::GPIOClass(int const pin):valuefd(-1),
 	this->export_gpio();
 }
 
-GPIOClass::~GPIOClass() {
+GPIO::~GPIO() {
 	this->unexport_gpio();
 }
 
-auto GPIOClass::export_gpio() -> int {
+auto GPIO::export_gpio() -> int {
 	int statusVal = -1;
 	string exportStr = "/sys/class/gpio/export";
 	auto const exportfd = statusVal = open(exportStr.c_str(),  O_WRONLY|O_SYNC);
@@ -46,7 +46,7 @@ auto GPIOClass::export_gpio() -> int {
 	return statusVal;
 }
 
-auto GPIOClass::unexport_gpio() -> int {
+auto GPIO::unexport_gpio() -> int {
 	int statusVal = -1;
 	string unexportStr = "/sys/class/gpio/unexport";
 	auto const unexportfd = statusVal = open(unexportStr.c_str(),  O_WRONLY|O_SYNC);
@@ -71,7 +71,7 @@ auto GPIOClass::unexport_gpio() -> int {
 	return statusVal;
 }
 
-auto GPIOClass::setdir_gpio(Direction const direction dir) -> int {
+auto GPIO::setdir_gpio(Direction const direction dir) -> int {
 	int statusVal = -1;
 	string setdirStr ="/sys/class/gpio/gpio" + std::to_string(this->_pin) + "/direction";	
 	
@@ -102,7 +102,7 @@ auto GPIOClass::setdir_gpio(Direction const direction dir) -> int {
 }
 
 
-auto GPIOClass::setValue(bool const bval) -> int
+auto GPIO::setValue(bool const bval) -> int
 {
 
 	int statusVal = -1;
@@ -134,7 +134,7 @@ auto GPIOClass::setValue(bool const bval) -> int
 	return statusVal;
 }
 
-auto GPIOClass::getValue() const -> bool {
+auto GPIO::getValue() const -> bool {
 	string getValStr = "/sys/class/gpio/gpio" + std::to_string(this->_pin) + "/value";
 	char buff[10];
 	auto statusVal = false;
@@ -168,6 +168,6 @@ auto GPIOClass::getValue() const -> bool {
 	return statusVal;
 }
 
-auto GPIOClass::getPin() -> int{
+auto GPIO::getPin() -> int{
 	return this->_pin;
 }
